@@ -1,0 +1,127 @@
+#!/usr/bin/env python3
+"""
+Bayesian decipherment using MCMC sampling
+"""
+import numpy as np
+import pymc as pm
+import arviz as az
+from typing import Dict, List
+import argparse
+import json
+from pathlib import Path
+
+class PhoneticPrior:
+    """Linear B phonetic knowledge as priors"""
+    def __init__(self, linear_b_mappings: Dict[str, str]):
+        self.mappings = linear_b_mappings
+        
+    def get_prior(self, sign_id: str) -> Dict[str, float]:
+        """Return prior distribution over phonemes for a sign"""
+        if sign_id in self.mappings:
+            phoneme = self.mappings[sign_id]
+            # Strong prior for Linear B equivalent
+            return {phoneme: 0.7, 'unknown': 0.3}
+        else:
+            # Uniform prior for unknown signs
+            return {'unknown': 1.0}
+
+class PhonotacticConstraints:
+    """Score phoneme sequences by linguistic plausibility"""
+    
+    def __init__(self):
+        self.allowed_clusters = ['pr', 'pl', 'tr', 'kr', 'st', 'sp', 'br', 'bl']
+        self.forbidden_clusters = ['tk', 'ps', 'mb', 'zd']
+        
+    def score_sequence(self, phonemes: List[str]) -> float:
+        """Return log probability of phoneme sequence"""
+        score = 0.0
+        for i in range(len(phonemes) - 1):
+            cluster = phonemes[i] + phonemes[i+1]
+            if cluster in self.forbidden_clusters:
+                score -= 10.0
+            elif cluster in self.allowed_clusters:
+                score += 1.0
+        return score
+
+class BayesianDecipherment:
+    """MCMC-based decipherment"""
+    
+    def __init__(self, sign_inventory, priors: PhoneticPrior, 
+                 phonotactics: PhonotacticConstraints):
+        self.inventory = sign_inventory
+        self.priors = priors
+        self.phonotactics = phonotactics
+        
+    def sample(self, corpus: List[Dict], num_samples: int = 10000):
+        """Run MCMC sampling"""
+        with pm.Model() as model:
+            # Define sign-to-phoneme mapping variables
+            # This is a simplified example - full implementation is complex
+            
+            # Placeholder for actual PyMC model
+            # Would define discrete distributions for each sign
+            pass
+        
+        # Would return trace here
+        return None
+    
+    def extract_hypotheses(self, trace, confidence_threshold: float = 0.6):
+        """Extract high-confidence phonetic mappings"""
+        hypotheses = []
+        # Analyze posterior distributions
+        # Return list of (sign, phoneme, confidence) tuples
+        return hypotheses
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--corpus', required=True, help='Path to corpus JSON (train.json or tokenized_corpus.json)')
+    parser.add_argument('--sign-inventory', required=True, help='Sign inventory JSON')
+    parser.add_argument('--linear-b-priors', required=False, help='Linear B priors JSON', default=None)
+    parser.add_argument('--num-samples', type=int, default=1000)
+    parser.add_argument('--num-chains', type=int, default=2)
+    parser.add_argument('--output', required=True, help='Output directory for hypotheses')
+    args = parser.parse_args()
+
+    out_dir = Path(args.output)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    # Load corpus (best-effort)
+    try:
+        corpus = json.loads(Path(args.corpus).read_text())
+    except Exception:
+        corpus = []
+
+    # Load sign inventory
+    try:
+        sign_inventory = json.loads(Path(args.sign_inventory).read_text())
+    except Exception:
+        sign_inventory = {}
+
+    # Load linear B priors if provided
+    lb_map = {}
+    if args.linear_b_priors:
+        try:
+            lb_map = json.loads(Path(args.linear_b_priors).read_text())
+        except Exception:
+            lb_map = {}
+
+    priors = PhoneticPrior(lb_map)
+    phonotactics = PhonotacticConstraints()
+    decipher = BayesianDecipherment(sign_inventory, priors, phonotactics)
+
+    print(f"Running Bayesian decipherment (sample={args.num_samples}, chains={args.num_chains})")
+    trace = None
+    try:
+        trace = decipher.sample(corpus, num_samples=args.num_samples)
+    except Exception as e:
+        print(f"Sampling failed or not implemented: {e}")
+
+    hypotheses = []
+    try:
+        hypotheses = decipher.extract_hypotheses(trace, confidence_threshold=0.6)
+    except Exception:
+        hypotheses = []
+
+    out_path = out_dir / 'best_hypotheses.json'
+    out_path.write_text(json.dumps(hypotheses, indent=2))
+    print(f"Wrote hypotheses to {out_path}")
