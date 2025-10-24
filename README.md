@@ -292,20 +292,6 @@ We welcome contributions from epigraphers, archaeologists, linguists, and ML res
 - 🗣️ **Expert Review**: Validating ML-generated hypotheses
 - 📝 **Documentation**: Improving tutorials and guides
 
-## 📚 Citation
-
-If you use this project in your research, please cite:
-
-```bibtex
-@software{linear_a_ml_2024,
-  title = {Linear A Decipherment Using Machine Learning},
-  author = {[Your Name]},
-  year = {2024},
-  url = {https://github.com/your-org/linear-a-decipherment},
-  version = {1.0.0}
-}
-```
-
 ## 📖 References
 
 ### Linear A/B Epigraphy
@@ -358,10 +344,6 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file for
 
 ## 📧 Contact
 
-- **Project Lead**: [your.email@example.com]
-- **Issues**: [GitHub Issues](https://github.com/your-org/linear-a-decipherment/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-org/linear-a-decipherment/discussions)
-
----
+- **Project Lead**: [paicualexandru44@gmail.com]
 
 **Disclaimer**: This project generates *hypotheses*, not proven decipherments. All outputs require expert validation and archaeological testing. We cannot definitively "solve" Linear A with ML alone - this is a tool to assist human scholarship.
